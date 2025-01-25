@@ -5,10 +5,12 @@ function generateAnonymousId() {
 let username = generateAnonymousId();
 
 // Replace with your local IP address
-const ws = new WebSocket('ws://192.168.29.23:8080');
+const ws = new WebSocket('ws://192.168.29.23:3000');
+
 
 ws.onopen = function() {
     console.log("Connected to the WebSocket server.");
+    keepAlive();
 };
 
 ws.onmessage = function(event) {
@@ -17,10 +19,12 @@ ws.onmessage = function(event) {
 
 ws.onerror = function(error) {
     console.error("WebSocket error:", error);
+    reconnect();
 };
 
 ws.onclose = function() {
     console.log("WebSocket connection closed.");
+    reconnect();
 };
 
 document.getElementById("send-button").addEventListener("click", function() {
@@ -177,7 +181,6 @@ function displayMessage(message, isSender) {
     });
 }
 
-
 // Typing indicator
 ws.onmessage = function(event) {
     let data = JSON.parse(event.data);
@@ -204,3 +207,20 @@ function hideTypingIndicator(username) {
 // Set chat start date
 let chatStartDate = new Date().toLocaleDateString();
 document.querySelector(".chat-start-date").textContent = `Chat started on: ${chatStartDate}`;
+
+function keepAlive() {
+    if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'ping' }));
+    }
+    setTimeout(keepAlive, 30000); // Ping every 30 seconds
+}
+
+function reconnect() {
+    setTimeout(function() {
+        ws = new WebSocket('ws://192.168.29.23:8080');
+        ws.onopen = ws.onopen;
+        ws.onmessage = ws.onmessage;
+        ws.onerror = ws.onerror;
+        ws.onclose = ws.onclose;
+    }, 5000); // Attempt to reconnect every 5 seconds
+}
