@@ -5,8 +5,7 @@ function generateAnonymousId() {
 let username = generateAnonymousId();
 
 // Replace with your local IP address
-const ws = new WebSocket('ws://192.168.29.23:3000');
-
+const ws = new WebSocket('wss://192.168.29.23:8080');
 
 ws.onopen = function() {
     console.log("Connected to the WebSocket server.");
@@ -217,7 +216,7 @@ function keepAlive() {
 
 function reconnect() {
     setTimeout(function() {
-        ws = new WebSocket('ws://192.168.29.23:8080');
+        ws = new WebSocket('wss://192.168.29.23:8080');
         ws.onopen = ws.onopen;
         ws.onmessage = ws.onmessage;
         ws.onerror = ws.onerror;
